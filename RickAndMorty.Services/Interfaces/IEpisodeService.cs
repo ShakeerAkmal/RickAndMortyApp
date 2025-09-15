@@ -7,10 +7,9 @@ using RickAndMortyApp.Data.Entities;
 
 namespace RickAndMorty.Services.Interfaces
 {
-    public interface ICharacterService
+    public interface IEpisodeService
     {
-        Task FetchAndSaveAliveCharactersAsync();
-        //Task<List<CharacterDto>> GetCharactersAsync();
+        Task FetchAndSaveEpisodesAsync();
     }
 
 }

@@ -12,13 +12,15 @@ namespace RickAndMorty.Services.Dtos
         public string? Type { get; set; }
         public string Gender { get; set; } = null!;
         public string Image { get; set; } = null!;
+        public string Url { get; set; } = null!;
         public DateTime Created { get; set; }
         public int OriginId { get; set; }
         public int CurrentLocationId { get; set; }
+        public List<string> Episode { get; set; }
         
         public LocationDto Origin { get; set; } = null!;
         public LocationDto Location { get; set; } = null!;
-        public ICollection<CharacterEpisode> CharacterEpisodes { get; set; } = new List<CharacterEpisode>();
+        public ICollection<CharacterEpisodeDto> CharacterEpisodes { get; set; } = new List<CharacterEpisodeDto>();
 
     }
 

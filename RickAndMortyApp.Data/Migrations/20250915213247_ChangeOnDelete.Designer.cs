@@ -12,8 +12,8 @@ using RickAndMortyApp.Data;
 namespace RickAndMortyApp.Data.Migrations
 {
     [DbContext(typeof(RickAndMortyContext))]
-    [Migration("20250915170934_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20250915213247_ChangeOnDelete")]
+    partial class ChangeOnDelete
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -28,10 +28,7 @@ namespace RickAndMortyApp.Data.Migrations
             modelBuilder.Entity("RickAndMortyApp.Data.Entities.Character", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("Created")
                         .HasColumnType("datetime2");
@@ -92,10 +89,7 @@ namespace RickAndMortyApp.Data.Migrations
             modelBuilder.Entity("RickAndMortyApp.Data.Entities.Episode", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("AirDate")
                         .IsRequired()
@@ -112,6 +106,10 @@ namespace RickAndMortyApp.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("Id");
 
                     b.ToTable("Episodes");
@@ -120,10 +118,7 @@ namespace RickAndMortyApp.Data.Migrations
             modelBuilder.Entity("RickAndMortyApp.Data.Entities.Location", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("Created")
                         .HasColumnType("datetime2");
@@ -140,6 +135,10 @@ namespace RickAndMortyApp.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("Id");
 
                     b.ToTable("Locations");
@@ -150,13 +149,13 @@ namespace RickAndMortyApp.Data.Migrations
                     b.HasOne("RickAndMortyApp.Data.Entities.Location", "Location")
                         .WithMany("Residents")
                         .HasForeignKey("CurrentLocationId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("RickAndMortyApp.Data.Entities.Location", "Origin")
                         .WithMany("OriginCharacters")
                         .HasForeignKey("OriginId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Location");

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using RickAndMortyApp.Data;
 
@@ -11,9 +12,11 @@ using RickAndMortyApp.Data;
 namespace RickAndMortyApp.Data.Migrations
 {
     [DbContext(typeof(RickAndMortyContext))]
-    partial class RickAndMortyContextModelSnapshot : ModelSnapshot
+    [Migration("20250915212855_InitialCreate")]
+    partial class InitialCreate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -146,13 +149,13 @@ namespace RickAndMortyApp.Data.Migrations
                     b.HasOne("RickAndMortyApp.Data.Entities.Location", "Location")
                         .WithMany("Residents")
                         .HasForeignKey("CurrentLocationId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired();
 
                     b.HasOne("RickAndMortyApp.Data.Entities.Location", "Origin")
                         .WithMany("OriginCharacters")
                         .HasForeignKey("OriginId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Location");

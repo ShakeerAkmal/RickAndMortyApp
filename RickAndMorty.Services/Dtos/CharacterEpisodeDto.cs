@@ -1,6 +1,6 @@
 ﻿namespace RickAndMorty.Services.Dtos
 {
-    public class CharacterEpisode
+    public class CharacterEpisodeDto
     {
         public int CharacterId { get; set; }
         public int EpisodeId { get; set; }

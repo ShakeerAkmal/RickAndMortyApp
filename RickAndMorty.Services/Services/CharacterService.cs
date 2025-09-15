@@ -9,6 +9,9 @@ using RickAndMorty.Services.Interfaces;
 using RickAndMortyApp.Data.Entities;
 using System.Net.Http.Json;
 using Microsoft.EntityFrameworkCore;
+using RickAndMorty.Services.Dtos;
+using System.ComponentModel.DataAnnotations;
+using RickAndMorty.Services.Converter;
 
 namespace RickAndMorty.Services.Services
 {
@@ -25,7 +28,10 @@ namespace RickAndMorty.Services.Services
 
         public async Task FetchAndSaveAliveCharactersAsync()
         {
-           var allCharacters = new List<ApiCharacter>();
+            var episodes = await _db.Episodes.ToListAsync();
+            var locations = await _db.Locations.ToListAsync();
+            var allCharacters = new List<CharacterDto>();
+            var characterEpisodesList = new List<CharacterEpisode>();
             for (int page = 1; ; page++)
             {
                 var characters = await FetchCharactersAsync(page);
@@ -33,40 +39,64 @@ namespace RickAndMorty.Services.Services
                 {
                     break;
                 }
-                allCharacters.AddRange(characters);
+                foreach (var character in characters.Where(c => c.Status == "Alive").ToList())
+                {
+                    character.OriginId = locations.FirstOrDefault(l => l.Name.Equals(character.Origin.Name,StringComparison.OrdinalIgnoreCase))?.Id ?? 1;
+                    character.CurrentLocationId = locations.FirstOrDefault(l => l.Name.Equals(character.Location.Name,StringComparison.OrdinalIgnoreCase))?.Id ?? 1;
+
+                    var characterEpisodes = await MapEpisodesAsync(episodes, character);
+                    if (characterEpisodes != null)
+                    {
+                        characterEpisodesList.AddRange(characterEpisodes);
+                    }
+                    allCharacters.Add(character);
+                }
             }
 
-            var alive = allCharacters.Where(c => c.Status == "Alive").ToList();
+            var characterEntities = allCharacters.Select(e => Converters.ToEntity(e)).ToList();
+            _db.Characters.AddRange(characterEntities);
+            _db.CharacterEpisodes.AddRange(characterEpisodesList);
+            await _db.SaveChangesAsync();
 
-            //_db.Characters.RemoveRange(_db.Characters);
-            //await _db.SaveChangesAsync();
-
-            //_db.Characters.AddRange(alive.Select(c => new Character
-            //{
-            //    Id = c.Id,
-            //    Name = c.Name,
-            //    Status = c.Status,
-            //    Species = c.Species
-            //}));
-            //await _db.SaveChangesAsync();
         }
 
-        private async Task<List<ApiCharacter>?> FetchCharactersAsync(int page)
+        private async Task<List<CharacterDto>?> FetchCharactersAsync(int page)
         {
             var response = await _http.GetAsync($"character?page={page}");
             if (response.IsSuccessStatusCode)
             {
                 var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponse>();
-                return apiResponse?.Results ?? new List<ApiCharacter>();
+                return apiResponse?.Results ?? new List<CharacterDto>();
             }
-            return new List<ApiCharacter>();
+            return new List<CharacterDto>();
         }
 
-        public Task<List<CharacterDto>> GetCharactersAsync() =>
-            _db.Characters.ToListAsync();
+        private async Task<List<CharacterEpisode>?> MapEpisodesAsync(List<Episode> episodes, CharacterDto character)
+        {
+            var characterEpisodes = new List<CharacterEpisode>();
+            foreach (var episodeUrl in character.Episode)
+            {
+                var episodeIdStr = episodeUrl.Split('/').Last();
+                if (int.TryParse(episodeIdStr, out int episodeId))
+                {
+                    var episode = await _db.Episodes.FindAsync(episodeId);
+                    if (episode != null)
+                    {
+                        characterEpisodes.Add(new CharacterEpisode
+                        {
+                            CharacterId = character.Id,
+                            EpisodeId = episode.Id
+                        });
+                    }
+                }
+            }
+            return characterEpisodes;
+        }
 
-        private record ApiResponse(List<ApiCharacter> Results);
-        private record ApiCharacter(int Id, string Name, string Status, string Species);
+        //public Task<List<CharacterDto>> GetCharactersAsync() =>
+        //    _db.Characters.ToListAsync();
+
+        private record ApiResponse(List<CharacterDto> Results);
     }
 
 }

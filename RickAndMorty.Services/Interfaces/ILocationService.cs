@@ -7,10 +7,11 @@ using RickAndMortyApp.Data.Entities;
 
 namespace RickAndMorty.Services.Interfaces
 {
-    public interface ICharacterService
+    public interface ILocationService
     {
-        Task FetchAndSaveAliveCharactersAsync();
-        //Task<List<CharacterDto>> GetCharactersAsync();
+        Task FetchAndSaveLocationsAsync();
+        Task DeleteAllData();
+
     }
 
 }

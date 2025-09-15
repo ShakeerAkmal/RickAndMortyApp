@@ -34,13 +34,13 @@ namespace RickAndMortyApp.Data
                 .HasOne(c => c.Origin)
                 .WithMany(l => l.OriginCharacters)
                 .HasForeignKey(c => c.OriginId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<Character>()
                 .HasOne(c => c.Location)
                 .WithMany(l => l.Residents)
                 .HasForeignKey(c => c.CurrentLocationId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.NoAction);
         }
     }
 
