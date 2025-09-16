@@ -4,8 +4,8 @@ using RickAndMortyApp.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers();  // for API endpoints
-builder.Services.AddRazorPages();   // for Razor views
+builder.Services.AddControllers();  
+builder.Services.AddRazorPages();   
 builder.Services.AddMvc();
 
 

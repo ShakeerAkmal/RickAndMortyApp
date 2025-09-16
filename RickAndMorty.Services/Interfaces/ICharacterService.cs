@@ -7,6 +7,8 @@ namespace RickAndMorty.Services.Interfaces
         Task FetchAndSaveAliveCharactersAsync();
         Task<(List<CharacterDto> Characters, bool FromDatabase)> GetCharactersAsync();
         Task<List<CharacterDto>> GetCharactersByLocationAsync(string locationName);
+        Task<int> CreateCharacter(CreateCharacterDto createCharacterDto);
+
     }
 
 }

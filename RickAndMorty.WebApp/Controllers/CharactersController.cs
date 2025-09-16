@@ -32,14 +32,14 @@ namespace RickAndMorty.WebApp.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Add(CharacterDto dto)
+        public async Task<IActionResult> Create(CreateCharacterDto createCharacterDto)
         {
-            var entity = Converters.ToEntity(dto);
-            // Save new character
-            //_characterService.AddCharacter(entity);
-
-            // Optional: Invalidate cache to force next retrieval from DB
-            return Ok(entity);
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+             var id = await _characterService.CreateCharacter(createCharacterDto);
+            return Ok(id);
         }
 
         

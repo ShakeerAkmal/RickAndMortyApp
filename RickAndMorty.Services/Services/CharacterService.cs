@@ -80,6 +80,81 @@ namespace RickAndMorty.Services.Services
             await _db.SaveChangesAsync();
 
         }
+        public async Task<List<CharacterDto>> GetCharactersByLocationAsync(string locationName)
+        {
+            var characters = _db.Characters
+                            .Where(c => c.Location != null && c.Location.Name == locationName)
+                            .Include(a => a.Location)
+                            .Select(Converters.ToDto).ToList();
+            return characters;
+        }
+
+        public async Task<int> CreateCharacter(CreateCharacterDto createCharacterDto)
+        {
+            var validLocationIds = await _db.Locations
+                .Where(l => l.Id == createCharacterDto.OriginId || l.Id == createCharacterDto.CurrentLocationId)
+                .Select(l => l.Id)
+                .ToListAsync();
+
+            if (createCharacterDto.OriginId.HasValue && !validLocationIds.Contains(createCharacterDto.OriginId.Value))
+            {
+                throw new ArgumentException($"Invalid origin location ID: {createCharacterDto.OriginId}");
+            }
+
+            if (createCharacterDto.CurrentLocationId.HasValue && !validLocationIds.Contains(createCharacterDto.CurrentLocationId.Value))
+            {
+                throw new ArgumentException($"Invalid current location ID: {createCharacterDto.CurrentLocationId}");
+            }
+
+            if (createCharacterDto.EpisodeIds?.Count > 0)
+            {
+                var validEpisodeIds = await _db.Episodes
+                    .Where(e => createCharacterDto.EpisodeIds.Contains(e.Id))
+                    .Select(e => e.Id)
+                    .ToListAsync();
+
+                var invalidEpisodeIds = createCharacterDto.EpisodeIds.Except(validEpisodeIds).ToList();
+                if (invalidEpisodeIds.Any())
+                {
+                    throw new ArgumentException($"Invalid episode IDs: {string.Join(", ", invalidEpisodeIds)}");
+                }
+            }
+
+            var maxId = await _db.Characters.MaxAsync(c => (int?)c.Id) ?? 0;
+            var character = new Character
+            {
+                Id = maxId + 1,
+                Name = createCharacterDto.Name,
+                Status = createCharacterDto.Status,
+                Species = createCharacterDto.Species,
+                Type = createCharacterDto.Type,
+                Gender = createCharacterDto.Gender,
+                Image = createCharacterDto.Image,
+                Created = DateTime.UtcNow,
+                OriginId = createCharacterDto.OriginId,
+                CurrentLocationId = createCharacterDto.CurrentLocationId
+            };
+
+            var entityEntry = _db.Characters.Add(character);
+
+            if (createCharacterDto.EpisodeIds?.Count > 0)
+            {
+                foreach (var episodeId in createCharacterDto.EpisodeIds)
+                {
+                    var characterEpisode = new CharacterEpisode
+                    {
+                        CharacterId = character.Id,
+                        EpisodeId = episodeId
+                    };
+                    _db.CharacterEpisodes.Add(characterEpisode);
+                }
+            }
+
+            await _db.SaveChangesAsync();
+            _cache.Remove(CacheKey);
+
+            return entityEntry.Entity.Id;
+        }
 
         private async Task<List<CharacterDto>?> FetchCharactersAsync(int page)
         {
@@ -121,14 +196,7 @@ namespace RickAndMorty.Services.Services
             return characterEpisodes;
         }
 
-        public async Task<List<CharacterDto>> GetCharactersByLocationAsync(string locationName)
-        {
-            var characters = _db.Characters
-                            .Where(c => c.Location != null && c.Location.Name == locationName)
-                            .Include(a=>a.Location)
-                            .Select(Converters.ToDto).ToList();
-            return characters;
-        }
+
     }
 
 }
