@@ -2,7 +2,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using RickAndMortyApp.Data;
-using RickAndMorty.Services;
 using RickAndMorty.Services.Interfaces;
 using RickAndMorty.Services.Services;
 using Microsoft.Extensions.Configuration;
@@ -36,6 +35,7 @@ var host = Host.CreateDefaultBuilder(args)
             c.BaseAddress = new Uri("https://rickandmortyapi.com/api/");
         });
 
+        services.AddMemoryCache();
     })
     .ConfigureLogging(logging =>
     {

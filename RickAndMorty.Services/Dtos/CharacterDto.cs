@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace RickAndMorty.Services.Dtos
+﻿namespace RickAndMorty.Services.Dtos
 {
     public class CharacterDto
     {

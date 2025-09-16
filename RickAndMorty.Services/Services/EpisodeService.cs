@@ -1,17 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
-using RickAndMorty.Services.Converter;
+﻿using RickAndMorty.Services.Converter;
 using RickAndMorty.Services.Dtos;
 using RickAndMorty.Services.Interfaces;
 using RickAndMortyApp.Data;
-using RickAndMortyApp.Data.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http.Json;
-using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace RickAndMorty.Services.Services
 {
@@ -61,6 +52,5 @@ namespace RickAndMorty.Services.Services
             return new List<EpisodeDto>();
         }
 
-        private record ApiResponse(List<EpisodeDto> Results);
     }
 }

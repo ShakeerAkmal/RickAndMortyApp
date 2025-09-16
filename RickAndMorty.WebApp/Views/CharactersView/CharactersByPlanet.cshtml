@@ -1,0 +1,100 @@
+﻿@model List<RickAndMorty.Services.Dtos.CharacterDto>
+
+@{
+    ViewData["Title"] = "Characters from " + (Model.FirstOrDefault()?.Location.Name ?? "Unknown");
+}
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f9;
+        margin: 20px;
+    }
+
+    h1 {
+        text-align: center;
+        color: #333;
+        margin-bottom: 30px;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        background-color: #fff;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    th, td {
+        padding: 12px 15px;
+        text-align: left;
+    }
+
+    th {
+        background-color: #4CAF50;
+        color: white;
+    }
+
+    tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+
+    tr:hover {
+        background-color: #e0f7fa;
+    }
+
+    img.character-image {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid #4CAF50;
+    }
+
+    .status-alive {
+        color: green;
+        font-weight: bold;
+    }
+
+    .status-dead {
+        color: red;
+        font-weight: bold;
+    }
+
+    .status-unknown {
+        color: gray;
+        font-weight: bold;
+    }
+</style>
+
+<h1>@ViewData["Title"]</h1>
+
+<table>
+    <thead>
+        <tr>
+            <th>Image</th>
+            <th>Name</th>
+            <th>Species</th>
+            <th>Status</th>
+            <th>Gender</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var character in Model)
+        {
+            var statusClass = character.Status switch
+            {
+                "Alive" => "status-alive",
+                "Dead" => "status-dead",
+                _ => "status-unknown"
+            };
+
+            <tr>
+                <td><img src="@character.Image" alt="@character.Name" class="character-image" /></td>
+                <td>@character.Name</td>
+                <td>@character.Species</td>
+                <td class="@statusClass">@character.Status</td>
+                <td>@character.Gender</td>
+            </tr>
+        }
+    </tbody>
+</table>

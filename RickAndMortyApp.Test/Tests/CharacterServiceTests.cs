@@ -1,15 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Moq;
-using Moq.Protected;
-using RickAndMorty.Services.Dtos;
+using Microsoft.Extensions.Caching.Memory;
 using RickAndMorty.Services.Services;
-using RickAndMortyApp.Data;
 using RickAndMortyApp.Data.Entities;
 using RickAndMortyApp.Test.Helpers;
-using System.Net;
-using System.Net.Http;
-using System.Net.Http.Json;
-using Xunit;
 
 namespace RickAndMorty.Tests
 {
@@ -70,8 +63,9 @@ namespace RickAndMorty.Tests
 
             var json = @"{""info"":{""count"":826,""pages"":42,""next"":""https://rickandmortyapi.com/api/character?page=2"",""prev"":null},""results"":[{""id"":1,""name"":""Rick Sanchez"",""status"":""Alive"",""species"":""Human"",""type"":"""",""gender"":""Male"",""origin"":{""name"":""Earth (C-137)"",""url"":""https://rickandmortyapi.com/api/location/1""},""location"":{""name"":""Earth (C-137)"",""url"":""https://rickandmortyapi.com/api/location/1""},""image"":""https://rickandmortyapi.com/api/character/avatar/1.jpeg"",""episode"":[""https://rickandmortyapi.com/api/episode/1""],""url"":""https://rickandmortyapi.com/api/character/1"",""created"":""2017-11-04T18:48:46.250Z""},{""id"":2,""name"":""Morty Smith"",""status"":""Alive"",""species"":""Human"",""type"":"""",""gender"":""Male"",""origin"":{""name"":""unknown"",""url"":""""},""location"":{""name"":""Citadel of Ricks"",""url"":""https://rickandmortyapi.com/api/location/2""},""image"":""https://rickandmortyapi.com/api/character/avatar/2.jpeg"",""episode"":[""https://rickandmortyapi.com/api/episode/1"",""https://rickandmortyapi.com/api/episode/2""],""url"":""https://rickandmortyapi.com/api/character/2"",""created"":""2017-11-04T18:50:21.651Z""},{""id"":3,""name"":""Summer Smith"",""status"":""Alive"",""species"":""Human"",""type"":"""",""gender"":""Female"",""origin"":{""name"":""Earth (C-137)"",""url"":""https://rickandmortyapi.com/api/location/1""},""location"":{""name"":""Citadel of Ricks"",""url"":""https://rickandmortyapi.com/api/location/2""},""image"":""https://rickandmortyapi.com/api/character/avatar/3.jpeg"",""episode"":[""https://rickandmortyapi.com/api/episode/1"",""https://rickandmortyapi.com/api/episode/2""],""url"":""https://rickandmortyapi.com/api/character/3"",""created"":""2017-11-04T19:09:56.428Z""},{""id"":4,""name"":""Beth Smith"",""status"":""Alive"",""species"":""Human"",""type"":"""",""gender"":""Female"",""origin"":{""name"":""Earth (C-137)"",""url"":""https://rickandmortyapi.com/api/location/1""},""location"":{""name"":""Citadel of Ricks"",""url"":""https://rickandmortyapi.com/api/location/2""},""image"":""https://rickandmortyapi.com/api/character/avatar/4.jpeg"",""episode"":[""https://rickandmortyapi.com/api/episode/2""],""url"":""https://rickandmortyapi.com/api/character/4"",""created"":""2017-11-04T19:22:43.665Z""}]}";
             var httpClient = HttpClientHelper.GetMockHttpClient(json);
-
-            var service = new CharacterService(httpClient, dbContext);
+            var memoryCache = new MemoryCache(new MemoryCacheOptions());
+    
+            var service = new CharacterService(httpClient, dbContext, memoryCache);
 
             // Act
             await service.FetchAndSaveAliveCharactersAsync();

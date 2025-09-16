@@ -1,6 +1,4 @@
-﻿using System.Text.Json.Serialization;
-
-namespace RickAndMorty.Services.Dtos
+﻿namespace RickAndMorty.Services.Dtos
 {
     public class ApiResponse<T>
     {

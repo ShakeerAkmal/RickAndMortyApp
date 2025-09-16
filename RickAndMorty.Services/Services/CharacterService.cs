@@ -1,19 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Caching.Memory;
 using RickAndMorty.Services.Converter;
 using RickAndMorty.Services.Dtos;
 using RickAndMorty.Services.Interfaces;
 using RickAndMortyApp.Data;
 using RickAndMortyApp.Data.Entities;
-using RickAndMortyApp.Data.Entities;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Net.Http.Json;
-using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace RickAndMorty.Services.Services
 {
@@ -21,11 +13,38 @@ namespace RickAndMorty.Services.Services
     {
         private readonly HttpClient _http;
         private readonly RickAndMortyContext _db;
+        private readonly IMemoryCache _cache;
 
-        public CharacterService(HttpClient http, RickAndMortyContext db)
+        private const string CacheKey = "CharacterList";
+        private static readonly TimeSpan RefreshInterval = TimeSpan.FromMinutes(5);
+
+        public CharacterService(HttpClient http, RickAndMortyContext db, IMemoryCache cache)
         {
             _http = http;
             _db = db;
+            _cache = cache;
+        }
+        public async Task<(List<CharacterDto> Characters, bool FromDatabase)> GetCharactersAsync()
+        {
+            if (_cache.TryGetValue(CacheKey, out List<CharacterDto> cachedCharacters))
+            {
+                return (cachedCharacters, false);
+            }
+
+            var dbCharacters = await _db.Characters
+                                    .Include(a => a.Location)
+                                    .Include(a => a.CharacterEpisodes)
+                                    .ThenInclude(a => a.Episode)
+                                    .ToListAsync();
+
+            if (dbCharacters.Any())
+            {
+                var dbCharacterDtos = dbCharacters.Select(Converters.ToDto).ToList();
+                _cache.Set(CacheKey, dbCharacterDtos, RefreshInterval);
+                return (dbCharacterDtos, true);
+            }
+            return (new List<CharacterDto>(), true);
+
         }
 
         public async Task FetchAndSaveAliveCharactersAsync()
@@ -43,8 +62,8 @@ namespace RickAndMorty.Services.Services
                 }
                 foreach (var character in characters.Where(c => c.Status == "Alive").ToList())
                 {
-                    character.OriginId = locations.FirstOrDefault(l => l.Name.Equals(character?.Origin?.Name,StringComparison.OrdinalIgnoreCase))?.Id;
-                    character.CurrentLocationId = locations.FirstOrDefault(l => l.Name.Equals(character?.Location?.Name,StringComparison.OrdinalIgnoreCase))?.Id;
+                    character.OriginId = locations.FirstOrDefault(l => l.Name.Equals(character?.Origin?.Name, StringComparison.OrdinalIgnoreCase))?.Id;
+                    character.CurrentLocationId = locations.FirstOrDefault(l => l.Name.Equals(character?.Location?.Name, StringComparison.OrdinalIgnoreCase))?.Id;
 
                     var characterEpisodes = await MapEpisodesAsync(episodes, character);
                     if (characterEpisodes != null)
@@ -102,10 +121,14 @@ namespace RickAndMorty.Services.Services
             return characterEpisodes;
         }
 
-        //public Task<List<CharacterDto>> GetCharactersAsync() =>
-        //    _db.Characters.ToListAsync();
-
-        private record ApiResponse(List<CharacterDto> Results);
+        public async Task<List<CharacterDto>> GetCharactersByLocationAsync(string locationName)
+        {
+            var characters = _db.Characters
+                            .Where(c => c.Location != null && c.Location.Name == locationName)
+                            .Include(a=>a.Location)
+                            .Select(Converters.ToDto).ToList();
+            return characters;
+        }
     }
 
 }
