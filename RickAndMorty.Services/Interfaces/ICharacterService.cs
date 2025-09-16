@@ -2,13 +2,12 @@
 
 namespace RickAndMorty.Services.Interfaces
 {
-    public interface ICharacterService
+      public interface ICharacterService
     {
-        Task FetchAndSaveAliveCharactersAsync();
-        Task<(List<CharacterDto> Characters, bool FromDatabase)> GetCharactersAsync();
-        Task<List<CharacterDto>> GetCharactersByLocationAsync(string locationName);
-        Task<int> CreateCharacter(CreateCharacterDto createCharacterDto);
-
+        Task<int> CreateCharacter(CreateCharacterDto createCharacterDto, CancellationToken cancellationToken = default);
+        Task FetchAndSaveAliveCharactersAsync(CancellationToken cancellationToken = default);
+        Task<(List<CharacterDto> Characters, bool FromDatabase)> GetCharactersAsync(CancellationToken cancellationToken = default);
+        Task<List<CharacterDto>> GetCharactersByLocationAsync(string locationName, CancellationToken cancellationToken = default);
     }
 
 }

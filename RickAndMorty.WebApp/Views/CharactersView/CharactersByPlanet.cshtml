@@ -1,7 +1,7 @@
 ﻿@model List<RickAndMorty.Services.Dtos.CharacterDto>
 
 @{
-    ViewData["Title"] = "Characters from " + (Model.FirstOrDefault()?.Location.Name ?? "Unknown");
+    ViewData["Title"] = "Characters from " + (Model.FirstOrDefault()?.Origin.Name ?? "Unknown");
 }
 
 <style>
