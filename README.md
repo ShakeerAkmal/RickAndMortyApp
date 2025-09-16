@@ -19,8 +19,6 @@ It includes a console tool to fetch data into a SQL Server database and a web ap
   * ASP.NET Core Razor Pages web app for browsing the database
   * Features:
 
-    * Paginated list of characters with status, species, and image
-    * Character details including episodes
     * **Origin-based browsing:** navigate to
 
       ```
