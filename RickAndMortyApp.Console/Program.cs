@@ -67,14 +67,14 @@ static async Task RunDataImportAsync(IHost host)
     {
         ("Starting data cleanup...", "Existing data deleted successfully", 
          () => locationService.DeleteAllData()),
-        
-        ("Fetching location data...", "Locations saved successfully", 
-         locationService.FetchAndSaveLocationsAsync),
-        
-        ("Fetching episode data...", "Episodes saved successfully", 
+
+        ("Fetching location data...", "Locations saved successfully",
+         () => locationService.FetchAndSaveLocationsAsync()),
+
+        ("Fetching episode data...", "Episodes saved successfully",
          () => episodeService.FetchAndSaveEpisodesAsync()),
-        
-        ("Fetching character data...", "Alive characters have been stored in the database.", 
+
+        ("Fetching character data...", "Alive characters have been stored in the database.",
          () => characterService.FetchAndSaveAliveCharactersAsync())
     };
 

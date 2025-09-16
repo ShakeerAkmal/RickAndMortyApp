@@ -1,4 +1,5 @@
-﻿using RickAndMortyApp.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using RickAndMortyApp.Data;
 using RickAndMorty.Services.Interfaces;
 using RickAndMorty.Services.Dtos;
 using RickAndMorty.Services.Converter;
@@ -11,61 +12,88 @@ namespace RickAndMorty.Services.Services
         private readonly HttpClient _http;
         private readonly RickAndMortyContext _db;
 
+        private static readonly JsonSerializerOptions JsonOptions = new()
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
+            PropertyNameCaseInsensitive = true
+        };
+
         public LocationService(HttpClient http, RickAndMortyContext db)
         {
             _http = http;
             _db = db;
         }
 
-        public async Task DeleteAllData()
+        public async Task DeleteAllData(CancellationToken cancellationToken = default)
         {
-            _db.CharacterEpisodes.RemoveRange(_db.CharacterEpisodes);
-            _db.Episodes.RemoveRange(_db.Episodes);
-            _db.Characters.RemoveRange(_db.Characters);
-            _db.Locations.RemoveRange(_db.Locations);
-            await _db.SaveChangesAsync();
-        }
-        
-        public async Task FetchAndSaveLocationsAsync()
-        {
-            _db.CharacterEpisodes.RemoveRange(_db.CharacterEpisodes);
-            _db.Episodes.RemoveRange(_db.Episodes);
-            _db.Characters.RemoveRange(_db.Characters);
-            _db.Locations.RemoveRange(_db.Locations);
+            using var transaction = await _db.Database.BeginTransactionAsync(cancellationToken);
+            try
+            {
+                await _db.CharacterEpisodes.ExecuteDeleteAsync(cancellationToken);
+                await _db.Episodes.ExecuteDeleteAsync(cancellationToken);
+                await _db.Characters.ExecuteDeleteAsync(cancellationToken);
+                await _db.Locations.ExecuteDeleteAsync(cancellationToken);
 
+                await transaction.CommitAsync(cancellationToken);
+            }
+            catch
+            {
+                await transaction.RollbackAsync(cancellationToken);
+                throw;
+            }
+        }
+
+        public async Task FetchAndSaveLocationsAsync(CancellationToken cancellationToken = default)
+        {
             var allLocations = new List<LocationDto>();
+
             for (int page = 1; ; page++)
             {
-                var locations = await FetchLocationsAsync(page);
-                if (locations.Count == 0)
+                var locations = await FetchLocationsAsync(page, cancellationToken);
+                if (locations == null || locations.Count == 0)
                 {
                     break;
                 }
                 allLocations.AddRange(locations);
             }
-            var locationEntities = allLocations.Select(l =>Converters.ToEntity(l)).ToList();
-            _db.Locations.AddRange(locationEntities);
-            var a = await _db.SaveChangesAsync();
 
-            var aa = allLocations;
-        }
-
-        private async Task<List<LocationDto>?> FetchLocationsAsync(int page)
-        {
-            var options = new JsonSerializerOptions
+            if (allLocations.Count > 0)
             {
-                PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
-                PropertyNameCaseInsensitive = true
-            };
-            var response = await _http.GetAsync($"location?page={page}");
-            if (response.IsSuccessStatusCode)
-            {
-                var jsonString = await response.Content.ReadAsStringAsync();
-                var apiResponse = JsonSerializer.Deserialize<ApiResponse<LocationDto>>(jsonString, options);
-                return apiResponse?.Results ?? new List<LocationDto>();
+                await SaveLocationsWithTransactionAsync(allLocations, cancellationToken);
             }
-            return new List<LocationDto>();
         }
 
+        private async Task SaveLocationsWithTransactionAsync(
+            List<LocationDto> locations,
+            CancellationToken cancellationToken)
+        {
+            using var transaction = await _db.Database.BeginTransactionAsync(cancellationToken);
+            try
+            {
+                var locationEntities = locations.Select(Converters.ToEntity).ToList();
+                _db.Locations.AddRange(locationEntities);
+
+                await _db.SaveChangesAsync(cancellationToken);
+                await transaction.CommitAsync(cancellationToken);
+            }
+            catch
+            {
+                await transaction.RollbackAsync(cancellationToken);
+                throw;
+            }
+        }
+
+        private async Task<List<LocationDto>?> FetchLocationsAsync(int page, CancellationToken cancellationToken)
+        {
+            var response = await _http.GetAsync($"location?page={page}", cancellationToken);
+            if (!response.IsSuccessStatusCode)
+            {
+                return new List<LocationDto>();
+            }
+
+            var jsonString = await response.Content.ReadAsStringAsync(cancellationToken);
+            var apiResponse = JsonSerializer.Deserialize<ApiResponse<LocationDto>>(jsonString, JsonOptions);
+            return apiResponse?.Results ?? new List<LocationDto>();
+        }
     }
 }

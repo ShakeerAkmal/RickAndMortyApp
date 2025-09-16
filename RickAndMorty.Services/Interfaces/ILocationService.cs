@@ -2,8 +2,8 @@
 {
     public interface ILocationService
     {
-        Task FetchAndSaveLocationsAsync();
-        Task DeleteAllData();
+        Task DeleteAllData(CancellationToken cancellationToken = default);
+        Task FetchAndSaveLocationsAsync(CancellationToken cancellationToken = default);
 
     }
 
