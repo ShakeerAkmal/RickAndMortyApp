@@ -23,6 +23,7 @@ namespace RickAndMorty.Services.Services
             _db.Episodes.RemoveRange(_db.Episodes);
             _db.Characters.RemoveRange(_db.Characters);
             _db.Locations.RemoveRange(_db.Locations);
+            await _db.SaveChangesAsync();
         }
         
         public async Task FetchAndSaveLocationsAsync()
