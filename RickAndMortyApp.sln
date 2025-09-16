@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RickAndMortyApp.Console", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RickAndMorty.Services", "RickAndMorty.Services\RickAndMorty.Services.csproj", "{546D9ADF-2FB7-4152-91D3-BE47A4329556}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RickAndMortyApp.Test", "RickAndMortyApp.Test\RickAndMortyApp.Test.csproj", "{270FC1A2-928B-4091-8DFC-2DEE08EED6BD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{546D9ADF-2FB7-4152-91D3-BE47A4329556}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{546D9ADF-2FB7-4152-91D3-BE47A4329556}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{546D9ADF-2FB7-4152-91D3-BE47A4329556}.Release|Any CPU.Build.0 = Release|Any CPU
+		{270FC1A2-928B-4091-8DFC-2DEE08EED6BD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{270FC1A2-928B-4091-8DFC-2DEE08EED6BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{270FC1A2-928B-4091-8DFC-2DEE08EED6BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{270FC1A2-928B-4091-8DFC-2DEE08EED6BD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,15 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using RickAndMortyApp.Data;
-using RickAndMortyApp.Data.Entities;
+﻿using RickAndMortyApp.Data;
 using RickAndMorty.Services.Interfaces;
-using System.Net.Http.Json;
-using Microsoft.EntityFrameworkCore;
 using RickAndMorty.Services.Dtos;
 using RickAndMorty.Services.Converter;
+using System.Text.Json;
 
 namespace RickAndMorty.Services.Services
 {
@@ -58,16 +51,20 @@ namespace RickAndMorty.Services.Services
 
         private async Task<List<LocationDto>?> FetchLocationsAsync(int page)
         {
+            var options = new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
+                PropertyNameCaseInsensitive = true
+            };
             var response = await _http.GetAsync($"location?page={page}");
             if (response.IsSuccessStatusCode)
             {
-                var cc = await response.Content.ReadAsStringAsync();
-                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponse>();
+                var jsonString = await response.Content.ReadAsStringAsync();
+                var apiResponse = JsonSerializer.Deserialize<ApiResponse<LocationDto>>(jsonString, options);
                 return apiResponse?.Results ?? new List<LocationDto>();
             }
             return new List<LocationDto>();
         }
 
-        private record ApiResponse(List<LocationDto> Results);
     }
 }

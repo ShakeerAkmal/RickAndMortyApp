@@ -1,15 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using RickAndMorty.Services.Converter;
+using RickAndMorty.Services.Dtos;
+using RickAndMorty.Services.Interfaces;
 using RickAndMortyApp.Data;
 using RickAndMortyApp.Data.Entities;
-using RickAndMorty.Services.Interfaces;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http.Json;
-using Microsoft.EntityFrameworkCore;
-using RickAndMorty.Services.Dtos;
-using RickAndMorty.Services.Converter;
+using System.Text;
+using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace RickAndMorty.Services.Services
 {
@@ -43,11 +45,17 @@ namespace RickAndMorty.Services.Services
 
         private async Task<List<EpisodeDto>?> FetchEpisodesAsync(int page)
         {
+            var options = new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
+                PropertyNameCaseInsensitive = true
+            };
+
             var response = await _http.GetAsync($"episode?page={page}");
             if (response.IsSuccessStatusCode)
             {
-                var cc = await response.Content.ReadAsStringAsync();
-                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponse>();
+                var jsonString = await response.Content.ReadAsStringAsync();
+                var apiResponse = JsonSerializer.Deserialize<ApiResponse<EpisodeDto>>(jsonString, options);
                 return apiResponse?.Results ?? new List<EpisodeDto>();
             }
             return new List<EpisodeDto>();

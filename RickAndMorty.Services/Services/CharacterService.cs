@@ -1,17 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using RickAndMorty.Services.Converter;
+using RickAndMorty.Services.Dtos;
+using RickAndMorty.Services.Interfaces;
 using RickAndMortyApp.Data;
 using RickAndMortyApp.Data.Entities;
-using RickAndMorty.Services.Interfaces;
 using RickAndMortyApp.Data.Entities;
-using System.Net.Http.Json;
-using Microsoft.EntityFrameworkCore;
-using RickAndMorty.Services.Dtos;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using RickAndMorty.Services.Converter;
+using System.Linq;
+using System.Net.Http.Json;
+using System.Text;
+using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace RickAndMorty.Services.Services
 {
@@ -41,8 +43,8 @@ namespace RickAndMorty.Services.Services
                 }
                 foreach (var character in characters.Where(c => c.Status == "Alive").ToList())
                 {
-                    character.OriginId = locations.FirstOrDefault(l => l.Name.Equals(character.Origin.Name,StringComparison.OrdinalIgnoreCase))?.Id ?? 1;
-                    character.CurrentLocationId = locations.FirstOrDefault(l => l.Name.Equals(character.Location.Name,StringComparison.OrdinalIgnoreCase))?.Id ?? 1;
+                    character.OriginId = locations.FirstOrDefault(l => l.Name.Equals(character?.Origin?.Name,StringComparison.OrdinalIgnoreCase))?.Id;
+                    character.CurrentLocationId = locations.FirstOrDefault(l => l.Name.Equals(character?.Location?.Name,StringComparison.OrdinalIgnoreCase))?.Id;
 
                     var characterEpisodes = await MapEpisodesAsync(episodes, character);
                     if (characterEpisodes != null)
@@ -62,10 +64,17 @@ namespace RickAndMorty.Services.Services
 
         private async Task<List<CharacterDto>?> FetchCharactersAsync(int page)
         {
+            var options = new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
+                PropertyNameCaseInsensitive = true
+            };
+
             var response = await _http.GetAsync($"character?page={page}");
             if (response.IsSuccessStatusCode)
             {
-                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponse>();
+                var jsonString = await response.Content.ReadAsStringAsync();
+                var apiResponse = JsonSerializer.Deserialize<ApiResponse<CharacterDto>>(jsonString, options);
                 return apiResponse?.Results ?? new List<CharacterDto>();
             }
             return new List<CharacterDto>();

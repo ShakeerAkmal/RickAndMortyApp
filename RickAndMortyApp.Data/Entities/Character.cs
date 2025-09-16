@@ -17,11 +17,11 @@ namespace RickAndMortyApp.Data.Entities
         public string Gender { get; set; } = null!;
         public string Image { get; set; } = null!;
         public DateTime Created { get; set; }
-        public int OriginId { get; set; }
-        public int CurrentLocationId { get; set; }
+        public int? OriginId { get; set; }
+        public int? CurrentLocationId { get; set; }
         
-        public Location Origin { get; set; } = null!;
-        public Location Location { get; set; } = null!;
+        public Location? Origin { get; set; } = null!;
+        public Location? Location { get; set; } = null!;
         public ICollection<CharacterEpisode> CharacterEpisodes { get; set; } = new List<CharacterEpisode>();
 
     }
