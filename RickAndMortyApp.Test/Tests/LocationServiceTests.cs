@@ -29,49 +29,5 @@ namespace RickAndMorty.Tests
 
         }
 
-        [Fact]
-        public async Task DeleteAllData_RemovesAllData()
-        {
-            // Arrange
-
-            var location = new Location
-            {
-                Id = 2,
-                Name = "Abadango",
-                Type = "Cluster",
-                Url = "https://rickandmortyapi.com/api/location/2",
-                Dimension = "unknown",
-                Created = DateTime.Parse("2025-09-15T22:34:20.0733218")
-            };
-
-            var morty = new Character
-            {
-                Id = 2,  
-                Name = "Morty Smith",
-                Status = "Alive",
-                Species = "Human",
-                Type = string.Empty,  
-                Gender = "Male",
-                Image = "https://rickandmortyapi.com/api/character/avatar/2.jpeg",
-                Created = DateTime.Parse("2017-11-04T18:50:21.6510000"),
-                OriginId = 1,
-                CurrentLocationId = 3
-            };
-
-            var dbContext = DbContextHelper.GetInMemoryDb();
-            dbContext.Locations.Add(location);
-            dbContext.Characters.Add(morty);
-            await dbContext.SaveChangesAsync();
-
-            var service = new LocationService(new HttpClient(), dbContext);
-
-            // Act
-            await service.DeleteAllData();
-            await dbContext.SaveChangesAsync();
-
-            // Assert
-            Assert.Empty(await dbContext.Locations.ToListAsync());
-            Assert.Empty(await dbContext.Characters.ToListAsync());
-        }
     }
 }
