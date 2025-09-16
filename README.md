@@ -1,116 +1,103 @@
-# Rick and Morty App
+﻿# Rick and Morty App
 
-A .NET 8 application that fetches data from the Rick and Morty API and provides a web interface to browse characters, episodes, and locations using ASP.NET Core Razor Pages.
+A **.NET 8** application that uses the [Rick and Morty API](https://rickandmortyapi.com/) to browse characters, episodes, and locations.
+It includes a console tool to fetch data into a SQL Server database and a web app to explore it.
+
+---
+
+## What Each App Does
+
+* **RickAndMortyApp.Console**
+
+  * Connects to the public [Rick and Morty API](https://rickandmortyapi.com/)
+  * Downloads characters, episodes, and locations
+  * Saves that data into your SQL Server database
+  * Run anytime to refresh your local data
+
+* **RickAndMorty.WebApp**
+
+  * ASP.NET Core Razor Pages web app for browsing the database
+  * Features:
+
+    * Paginated list of characters with status, species, and image
+    * Character details including episodes
+    * **Origin-based browsing:** navigate to
+
+      ```
+      ~/characters/from/{locationName}
+      ```
+
+      to see all characters whose origin is `{locationName}`
+    * **Swagger UI** at `/swagger` for exploring and testing API endpoints
+
+---
 
 ## Project Structure
-- **Web App**: ASP.NET Core Razor Pages web application providing the user interface
-- **Console App**: Data fetching utility that populates the database from the Rick and Morty API
-- **RickAndMortyApp.Test**: Unit test project with service layer tests
 
-## Prerequisites
-- .NET 8.0 or later
-- SQL Server (Express or full version)
-- Visual Studio 2022 or VS Code
-
-## Setup Instructions
-
-### 1. Create Empty MSSQL Database
-Create a new empty database in SQL Server Management Studio or using command line:
-```sql
-CREATE DATABASE RickAndMortyDB;
+```
+RickAndMortyApp/
+├── RickAndMorty.WebApp/       # ASP.NET Core Razor Pages web app
+├── RickAndMortyApp.Console/   # Console app to download and populate data
+├── RickAndMortyApp.Data/      # Entity Framework Core data layer
+├── RickAndMorty.Services/     # Business logic services
+├── RickAndMortyApp.Test/      # Unit tests
+└── RickAndMortyApp.sln        # Solution file
 ```
 
-### 2. Configure Connection Strings
-Update the connection strings in both applications to point to your SQL Server instance:
+---
 
-#### Web App - appsettings.json
-```json
-{
-  "ConnectionStrings": {
-    "DefaultConnection": "Server=(localdb)\\mssqllocaldb;Database=RickAndMortyDB;Trusted_Connection=true;MultipleActiveResultSets=true"
-  }
-}
-```
+## Quick Start
 
-#### Console App - appsettings.json
-```json
-{
-  "ConnectionStrings": {
-    "DefaultConnection": "Server=(localdb)\\mssqllocaldb;Database=RickAndMortyDB;Trusted_Connection=true;MultipleActiveResultSets=true"
-  }
-}
-```
+1. **Clone & Restore**
 
-### 3. Run Entity Framework Migrations
-Navigate to the Web App directory and run the database update command:
+   ```bash
+   git clone https://github.com/ShakeerAkmal/RickAndMortyApp.git
+   cd RickAndMortyApp
+   dotnet restore
+   ```
 
-```bash
-cd WebApp
-dotnet ef database update
-```
+2. **Create the Database**
+   Create an empty SQL Server database (e.g., `RickAndMortyDB`).
 
-This will create the necessary tables and schema in your database.
+3. **Set Connection String**
+   Edit `RickAndMorty.WebApp/appsettings.json` and `RickAndMortyApp.Console/appsettings.json` with your SQL Server connection.
 
-### 4. Populate Database
-Run the Console App to fetch data from the Rick and Morty API and populate your database:
+4. **Apply Migrations**
 
-```bash
-cd ConsoleApp
-dotnet run
-```
+   ```bash
+   cd RickAndMorty.WebApp
+   dotnet ef database update
+   ```
 
-The console application will:
-- Fetch characters from the Rick and Morty API
-- Fetch episodes and locations
-- Store the data in your SQL Server database
+5. **Load Data**
 
-### 5. Run the Web Application
-Start the web application to browse the data:
+   ```bash
+   cd ../RickAndMortyApp.Console
+   dotnet run
+   ```
 
-```bash
-cd WebApp
-dotnet run
-```
+6. **Run the Web App**
 
-
-## Testing
-
-### Unit Tests
-The project includes comprehensive unit tests for the service layer using xUnit and in-memory Entity Framework databases.
-
-**Run all unit tests:**
-```bash
-dotnet test
-```
-
-**Run tests from the test project directory:**
-```bash
-cd RickAndMortyApp.Test
-dotnet test
-```
+   ```bash
+   cd ../RickAndMorty.WebApp
+   dotnet run
+   ```
 
 
 
-### Test Helpers
-The test project uses helper classes for:
-- **DbContextHelper** - Provides in-memory database contexts for testing
-- **HttpClientHelper** - Creates mock HTTP clients for API testing
+## Technologies
 
-## Features
-- Browse Rick and Morty characters
-- View character details including episodes they appear in
-- Search and filter functionality
-- Web interface
-- Unit tested service layer
+* .NET 8
+* ASP.NET Core Razor Pages
+* Entity Framework Core 9
+* SQL Server
+* xUnit & Moq (unit testing)
+* EF Core InMemory (unit tests)
+* Microsoft.Extensions.Caching.Memory
+* Swashbuckle.AspNetCore (Swagger)
+* Rick and Morty API
+
+---
 
 
-
-
-## Technologies Used
-- ASP.NET Core
-- Entity Framework Core
-- SQL Server
-- Rick and Morty API (https://rickandmortyapi.com/)
-- xUnit (Testing Framework)
-- Entity Framework InMemory (For Unit Testing)
-- Microsoft.Extensions.Caching.Memory (Caching)
+  ```
