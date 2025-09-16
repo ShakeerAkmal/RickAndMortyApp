@@ -1,11 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using RickAndMorty.Services.Interfaces;
 using RickAndMorty.Services.Dtos;
-using RickAndMorty.Services.Converter;
+
 namespace RickAndMorty.WebApp.Controllers
 {
-
-    [Route("characters")]
     public class CharactersViewController : Controller
     {
         private readonly ICharacterService _characterService;
@@ -15,34 +13,29 @@ namespace RickAndMorty.WebApp.Controllers
             _characterService = characterService;
         }
 
-        // GET: /characters/from/Earth (C-137)
-        [HttpGet("from/{planetName}")]
-        public async Task<IActionResult> FromPlanet(string planetName)
-        {
-            var characters = await _characterService.GetCharactersByLocationAsync(planetName);
-            return View("CharactersByPlanet", characters);
-        }
-
+        // Razor Page endpoint - returns HTML view
+        [Route("characters/from/{planetName}")]
         [HttpGet]
-        public async Task<IActionResult> Get()
+        public async Task<IActionResult> FromPlanet(string planetName, CancellationToken cancellationToken = default)
         {
-            var (characters, fromDb) = await _characterService.GetCharactersAsync();
-            Response.Headers["from-database"] = fromDb.ToString();
-            return Ok(characters);
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> Create(CreateCharacterDto createCharacterDto)
-        {
-            if (!ModelState.IsValid)
+            if (string.IsNullOrWhiteSpace(planetName))
             {
-                return BadRequest(ModelState);
+                return NotFound("Planet name is required");
             }
-             var id = await _characterService.CreateCharacter(createCharacterDto);
-            return Ok(id);
-        }
 
-        
+            try
+            {
+                var characters = await _characterService.GetCharactersByLocationAsync(planetName, cancellationToken);
+                ViewData["PlanetName"] = planetName;
+                return View("CharactersByPlanet", characters);
+            }
+            catch (Exception)
+            {
+                TempData["Error"] = $"Unable to load characters from {planetName}. Please try again.";
+                return View("CharactersByPlanet", new List<CharacterDto>());
+            }
+        }
     }
 
+   
 }

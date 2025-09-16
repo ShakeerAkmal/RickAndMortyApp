@@ -102,11 +102,37 @@ namespace RickAndMorty.Services.Services
                 throw new ArgumentException("Location name cannot be null or empty", nameof(locationName));
 
             var characters = await _db.Characters
-                    .Where(c => c.Origin != null && c.Origin.Name == locationName)
-                    .Include(a => a.Origin)
-                    .AsNoTracking()
-                    .Select(c => Converters.ToDto(c))
-                    .ToListAsync(cancellationToken);
+                .Where(c => c.Origin != null && c.Origin.Name == locationName)
+                .AsNoTracking()
+                .Select(c => new CharacterDto
+                {
+                    Id = c.Id,
+                    Name = c.Name,
+                    Status = c.Status,
+                    Species = c.Species,
+                    Type = c.Type,
+                    Gender = c.Gender,
+                    Image = c.Image,
+                    OriginId = c.OriginId,
+                    CurrentLocationId = c.CurrentLocationId,
+                    Origin = c.Origin != null ? new LocationDto
+                    {
+                        Id = c.Origin.Id,
+                        Name = c.Origin.Name,
+                        Type = c.Origin.Type,
+                        Dimension = c.Origin.Dimension,
+                        Url = c.Origin.Url
+                    } : null,
+                    Location = c.Location != null ? new LocationDto
+                    {
+                        Id = c.Location.Id,
+                        Name = c.Location.Name,
+                        Type = c.Location.Type,
+                        Dimension = c.Location.Dimension,
+                        Url = c.Location.Url
+                    } : null
+                })
+                .ToListAsync(cancellationToken);
 
             return characters;
         }
