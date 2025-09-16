@@ -72,7 +72,7 @@ static async Task RunDataImportAsync(IHost host)
          locationService.FetchAndSaveLocationsAsync),
         
         ("Fetching episode data...", "Episodes saved successfully", 
-         episodeService.FetchAndSaveEpisodesAsync),
+         () => episodeService.FetchAndSaveEpisodesAsync()),
         
         ("Fetching character data...", "Alive characters have been stored in the database.", 
          () => characterService.FetchAndSaveAliveCharactersAsync())

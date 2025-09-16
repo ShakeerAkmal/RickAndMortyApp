@@ -2,7 +2,7 @@
 {
     public interface IEpisodeService
     {
-        Task FetchAndSaveEpisodesAsync();
+        Task FetchAndSaveEpisodesAsync(CancellationToken cancellationToken = default);
     }
 
 }
