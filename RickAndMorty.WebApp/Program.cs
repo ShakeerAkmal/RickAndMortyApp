@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using RickAndMorty.Services.Middleware;
 using RickAndMorty.WebApp;
 using RickAndMortyApp.Data;
 
@@ -7,7 +8,6 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();  
 builder.Services.AddRazorPages();   
 builder.Services.AddMvc();
-
 
 builder.Services.AddDbContext<RickAndMortyContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -31,6 +31,9 @@ if (app.Environment.IsDevelopment())
 
 app.UseStaticFiles();
 app.UseRouting();
+
+app.UseMiddleware<ArgumentExceptionMiddleware>();
+
 app.MapControllers();
 app.MapRazorPages();
 

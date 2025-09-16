@@ -140,7 +140,7 @@ namespace RickAndMorty.Services.Services
                 _cache.Remove(CacheKey);
                 return character.Id;
             }
-            catch(Exception e)
+            catch(Exception)
             {
                 await transaction.RollbackAsync(cancellationToken);
                 throw;
