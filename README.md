@@ -1,0 +1,1 @@
+CREATE A readme file to start my solution. create empty mssql db. then change the connections tring in borh appsettings in web and console apps. then point to web app and run update-database. once the db is updated run console app. this would fetch data and populate api. now run we app.
